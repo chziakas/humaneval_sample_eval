@@ -9,22 +9,24 @@ class Evaluator(ABC):
         pass
 
 class HumanEvalEvaluator(Evaluator):
-    def __init__(self, k, n_workers=4, timeout=3.0):
+    def __init__(self, k, num_eval_problems= 2, num_samples_per_task =2, n_workers=4, timeout=3.0, ):
         self.dataset = 'data/HumanEval.jsonl.gz'
         self.k = k
         self.n_workers = n_workers
         self.timeout = timeout
+        self.num_eval_problems = num_eval_problems
+        self.num_samples_per_task =num_samples_per_task
 
-    def sample_problems(self, generator, num_eval_problems=2, num_samples_per_task=2):
+    def sample_problems(self, generator):
         problems = read_problems(self.dataset)
-        problems_eval = dict(list(problems.items())[:num_eval_problems])
+        problems_eval = dict(list(problems.items())[:self.num_eval_problems])
         samples = [
             {
                 "task_id": task_id,
                 "completion": generator.generate_one_completion(problems[task_id]["prompt"])
             }
             for task_id in problems_eval
-            for _ in range(num_samples_per_task)
+            for _ in range(self.num_samples_per_task)
         ]
         return samples, problems_eval
 
